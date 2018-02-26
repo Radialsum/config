@@ -4,6 +4,10 @@ Config Repository
 
 This repository collects misc `rc` or `ini` (or similar) files.
 
+Vimrc
+-----
+The `_vimrc` is mostly for Windows OSes. It is used only with GVim.
+
 Vim color scheme
 ----------------
 
@@ -31,7 +35,7 @@ distinct and also to make it the first one in menu.
 
 It was triggered by the quest to find *perceptually equidistant colors* or 
 *perceptually-distinct colors*. However, the currently used colors do not
-necessarily fit either requirements though!
+necessarily fit either criteria though!
 
 The colors are mostly influenced by the C/C++ syntax highlighting, and
 therefore it is deliberate that the `Comment` is somewhat darker and `Macro`
