@@ -106,7 +106,11 @@ hi Ignore         guifg=#555566
 hi Error          guifg=#FFDFE4       guibg=#F00000
 hi Todo           guifg=#F7FFB7       guibg=#FF5E00
 
-hi MatchParen     guibg=DarkBlue      term=reverse ctermbg=3
+hi MatchParen     guibg=DarkCyan
 
 hi link           QuickFixLine        Visual
+
+hi Pmenu          guibg=darkmagenta
+hi PmenuSel       guifg=black
+
 "vim: sw=4
