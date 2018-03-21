@@ -1,0 +1,188 @@
+# main()
+snippet main
+	int main(int argc, const char *argv[])
+	{
+		(void)argc;
+		(void)argv;
+		// EnvVersion().Print(); //x ver<tab>
+		${1}
+		return 0;
+	}
+# ver - prints compiler version
+snippet ver
+	// prints compiler version and OS info {{{
+	struct EnvVersion {
+		void Print() {
+	#define STR(x) #x
+	#define STR1(x) STR(x)
+			fprintf(stderr, " :: ");
+	#if defined(__clang__)
+			fprintf(stderr, "LLVM/Clang %d.%d.%d", __clang_major__,
+					__clang_minor__, __clang_patchlevel__);
+	#if defined(__GNUC__) || defined(_MSC_FULL_VER)
+			fprintf(stderr, " / ");
+	#endif
+	#endif
+	#if defined(__GNUC__)
+			fprintf(stderr, "GCC ");
+	#if defined(GCVER)
+			fprintf(stderr, "%s", STR1(GCVER));
+	#else
+			fprintf(stderr, "%d.%d.%d", __GNUC__,
+					__GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+	#endif
+	#if defined(__MINGW64_VERSION_MAJOR)
+			fprintf(stderr, " / MinGW-w64 %d.%d",
+					__MINGW64_VERSION_MAJOR, __MINGW64_VERSION_MINOR);
+	#elif defined(__MINGW32_MAJOR_VERSION)
+			fprintf(stderr, " / MinGW32 %d.%d",
+					__MINGW32_MAJOR_VERSION, __MINGW32_MINOR_VERSION);
+	#endif
+	#endif
+	#if defined(_MSC_FULL_VER)
+			fprintf(stderr, "MSVC ");
+	#if defined(VCVER)
+			fprintf(stderr, "%s", STR1(VCVER));
+	#else
+			fprintf(stderr, "%s", STR1(_MSC_FULL_VER));
+	#endif
+	#endif
+	#if defined(_WIN64)
+			fprintf(stderr, " - Windows 64bit");
+	#elif defined(_WIN32)
+			fprintf(stderr, " - Windows 32bit");
+	#else
+			fprintf(stderr, " - Anon. OS");
+	#endif
+	#if defined(__amd64__) || defined(_M_AMD64)
+			fprintf(stderr, " - x86-64 CPU\n");
+	#elif defined(__i386__) || defined(_M_IX86)
+			fprintf(stderr, " - x86 CPU\n");
+	#else
+			fprintf(stderr, " - Anon. CPU\n");
+	#endif
+	#undef STR1
+	#undef STR
+		}
+	}; // }}}
+# #include <...>
+snippet inc
+	#include <${1:stdio}.h>${2}
+# #include "..."
+snippet incl
+	#include "${1:`Filename("$1.h")`}"${2}
+# #ifndef ... #define ... #endif
+snippet #ifn
+	#ifndef $1
+	#define ${1:SYMBOL} ${2:value}
+	#endif // $1${3}
+snippet def
+	#define 
+snippet ifdef
+	#ifdef ${1:FOO}
+		${2:#define }
+	#endif // $1${3}
+snippet #if
+	#if ${1:FOO}
+		${2}
+	#endif // $1${3}
+# Header Include-Guard
+# (the randomizer code is taken directly from TextMate; it could probably be
+# cleaner, I don't know how to do it in vim script)
+snippet once
+	#ifndef ${1:`toupper(Filename('', 'UNTITLED').'_'.system("/usr/bin/ruby -e 'print (rand * 2821109907455).round.to_s(36)'"))`}
+
+	#define $1
+
+	${2}
+
+	#endif // $1
+# If Condition
+snippet if
+	if (${1:/* condition */}) {
+		${2:/* code */}
+	} else { }
+snippet el
+	else {
+		${1}
+	}
+snippet ife
+	if (${1:/* condition */}) {
+	} else {
+	}
+# Tertiary conditional
+snippet t
+	${1:/* condition */} ? ${2:a} : ${3:b}
+# Do While Loop
+snippet do
+	do {
+		${2:/* code */}
+	} while (${1:/* condition */});
+# While Loop
+snippet wh
+	while (${1:/* condition */}) {
+		${2:/* code */}
+	}
+# For Loop
+snippet for
+	for (int ${2:i} = 0; $2 < ${1:count}; $2${3:++}) {
+		${4:/* code */}
+	}
+# Custom For Loop
+snippet forr
+	for (${1:i} = ${2:0}; ${3:$1 < 10}; $1${4:++}) {
+		${5:/* code */}
+	}
+# switch
+snippet sw
+	switch (${1:var_name}) {
+	case ${2:value}:
+		break;
+	default:
+		break;
+	}
+# Function
+snippet fun
+	${1:void} ${2:function_name}(${3})
+	{
+		${4:/* code */}
+	}
+# Function Declaration
+snippet fund
+	${1:void} ${2:function_name}(${3});${4}
+# Typedef
+snippet td
+	typedef ${1:int} ${2:MyCustomType};${3}
+# Struct
+snippet struct
+	struct ${1:`Filename('$1_t', 'name')`} {
+		${2:/* data */}
+	}${3: /* optional variable list */};${4}
+snippet st
+	struct ${1:struct_name} {
+		${2:/* data */}
+	};${3}
+# Typedef struct
+snippet tds
+	typedef struct ${2:_$1 }{
+		${3:/* data */}
+	} ${1:`Filename('$1_t', 'name')`};
+# Typdef enum
+snippet tde
+	typedef enum {
+		${1:/* data */}
+	} ${2:foo};
+# printf
+# unfortunately version this isn't as nice as TextMates's, given the lack of a
+# dynamic `...`
+snippet pr
+	printf("${1:%s}\n"${2});${3}
+# fprintf (again, this isn't as nice as TextMate's version, but it works)
+snippet fpr
+	fprintf(${1:stderr}, "${2:%s}\n"${3});${4}
+snippet .
+	[${1}]${2}
+snippet un
+	unsigned
+snippet v
+	(void)${1:0};$2
