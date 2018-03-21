@@ -1,19 +1,15 @@
 " Vim color file
-" Based on desert.vim by Hans Fugal
+" Last Change: 2018-03-19
 "
-" the prefix '_' on _desert.vim used to make it first one as well as
-" different from original.
-"
-" NOTE: QuickFixLine needs newer vim 8.0
-"
+" rested.vim is a mangled version of desert.vim that is by Hans Fugal
 
-"
+" This color-scheme was influenced by the quest to find
+" "perceptually equidistant colors" or "perceptually-distinct colors".
+" The currently used colors do not fit either criteria in any manner!
+
 " Original file info
-" Maintainer:   Hans Fugal <hans@fugal.net>
-" Last Change:  $Date: 2004/06/13 19:30:30 $
-" Last Change:  $Date: 2004/06/13 19:30:30 $
-" URL:          http://hans.fugal.net/vim/colors/desert.vim
-" Version:      $Id: desert.vim,v 1.1 2004/06/13 19:30:30 vimboss Exp $
+" -- Maintainer:   Hans Fugal <hans@fugal.net>
+" -- URL:          http://hans.fugal.net/vim/colors/desert.vim
 
 set background=dark
 
@@ -25,12 +21,12 @@ if version > 580
         syntax reset
     endif
 endif
-let g:colors_name="_desert"
+let g:colors_name="rested"
 
 hi Normal         guifg=#C5CAD0       guibg=#25272a
 hi CursorLine     guibg=#333333
 hi CursorLineNr   guibg=#20252a       gui=none
-hi CursorColumn   guibg=#20252a
+hi CursorColumn   guibg=#333333
 hi Directory      guifg=#6394ED
 
 " highlight groups
@@ -53,12 +49,12 @@ hi Question       guifg=springgreen
 hi Search         guibg=gold
 hi SpecialKey     guifg=yellowgreen
 hi StatusLine     guibg=#c2bfa5       guifg=gray10 gui=none
-hi StatusLineNC   guibg=#c2bfa5       guifg=gray33 gui=none
+hi StatusLineNC   guibg=#c2bfa5       guifg=gray45 gui=none
 hi Title          guifg=indianred
 hi Visual         gui=none            guibg=DarkOliveGreen
 "hi VisualNOS
 hi WarningMsg     guifg=salmon
-"hi WildMenu
+hi WildMenu       guifg=wheat         guibg=darkgreen
 "hi Menu
 "hi Scrollbar
 "hi Tooltip
@@ -106,11 +102,14 @@ hi Ignore         guifg=#555566
 hi Error          guifg=#FFDFE4       guibg=#F00000
 hi Todo           guifg=#F7FFB7       guibg=#FF5E00
 
-hi MatchParen     guibg=DarkCyan
+hi MatchParen     guifg=#f8f8ff       guibg=DarkCyan
 
-hi link           QuickFixLine        Visual
+" NOTE: QuickFixLine needs newer vim 8.0
+hi QuickFixLine   gui=none            guibg=DarkOliveGreen
 
-hi Pmenu          guibg=darkmagenta
-hi PmenuSel       guifg=black
+hi Pmenu          guifg=#DDBBDD       guibg=#550055
+hi PmenuSel       guifg=#FFCCFF       guibg=#770077
+
+hi SignColumn     guibg=grey30        guifg=tan
 
 "vim: sw=4
