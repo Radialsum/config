@@ -1,7 +1,7 @@
 "
 " vimrc --- for GVim 8, perhaps a gvimrc in disguise.
 "
-" Last change:  2018-02-26
+" Last change:  2018-03-21
 "
 " >>  Based on the example for a vimrc file
 " >>  by Bram Moolenaar <Bram@vim.org>
@@ -25,6 +25,7 @@ set nobackup
 " viminfo is written to ram drive --- it will be lost
 if empty($RAMDRIVE)
   set viminfo=
+  set directory=
   set noswapfile
 else
   " if !isdirectory($RAMDRIVE."/home/".$USERNAME."/tmp")
@@ -33,15 +34,18 @@ else
   " if !isdirectory($RAMDRIVE."/home/".$USERNAME."/vim")
   "   call mkdir($RAMDRIVE."/home/".$USERNAME."/vim", "p")
   " endif
+
   if isdirectory($RAMDRIVE."/home/".$USERNAME."/vim")
     execute "set viminfo+=n".$RAMDRIVE."/home/".$USERNAME."/vim/_viminfo"
   else
     set viminfo=
   endif
+
   if isdirectory($RAMDRIVE."/home/".$USERNAME."/tmp")
     execute "set directory=".$RAMDRIVE."/home/".$USERNAME."/tmp"
   else
     " set dir=~/AppData/Local/Temp//,c:/tmp,.
+    set viminfo=
     set directory=
     set noswapfile
   endif
@@ -52,15 +56,15 @@ endif
 " set guifont=DejaVu_Sans_Mono_for_Powerline:h9:cANSI
 " set guifont=Droid_Sans_Mono:h8:cANSI
 " set guifont=Droid_Sans_Mono_Slashed:h10:cANSI
-set guifont=DejaVu_Sans_Mono:h9:cANSI:qDRAFT
+" set guifont=DejaVu_Sans_Mono:h9:cANSI
+set guifont=Hack:h9:cANSI:qDRAFT
 set guioptions-=T
 
 " set background=light
 set background=dark
-colorscheme _desert
+colorscheme rested
 set linebreak
 
-" set shell=C:\windows\system32\cmd.exe
 set shell=C:\windows\system32\cmd.exe\ /D
 
 " allow backspacing over everything in insert mode
@@ -75,6 +79,10 @@ set columns=95
 set foldcolumn=2
 set foldmethod=marker
 
+if &diff
+  set columns=170
+endif
+
 " no beep or flash is wanted
 set vb t_vb=
 
@@ -86,14 +94,15 @@ if (v:progname =~? "less") || (v:progname =~? "view")
   set nowrite
   source $VIMRUNTIME/macros/less.vim
   syntax on
-  nmap <Down> <C-E>
-  nmap <Up> <C-Y>
+  noremap <Down> <C-E>
+  noremap <Up> <C-Y>
 
   if v:progname =~? "less"
     set nofoldenable
+    finish
   endif
 
-  finish
+  unmap z
 endif
 
 set backspace=indent,eol,start
@@ -101,9 +110,7 @@ set tabstop=2
 set shiftwidth=2
 set softtabstop=2
 set expandtab
-
-" For Win32 GUI: remove 't' flag from 'guioptions': no tearoff menu entries
-" let &guioptions = substitute(&guioptions, "t", "", "g")
+set formatoptions-=o
 
 " Don't use Ex mode, use Q for formatting
 map Q gq
@@ -131,10 +138,11 @@ if has("autocmd")
   augroup vimrcEx
   au!
 
-  " For all text files set 'textwidth' to 78 characters.
-  " autocmd FileType text setlocal textwidth=55
-  au BufRead,BufNewFile *.txt setlocal formatoptions+=n
-  au BufRead,BufNewFile *.txt setlocal textwidth=57 autoindent smartindent
+  au BufRead *.txt setlocal formatoptions+=n
+    \ textwidth=57 autoindent smartindent
+
+  au BufNewFile *.txt setlocal formatoptions+=n
+    \ textwidth=57 autoindent smartindent fileformat=unix
 
   " autocmd FileType python
   au BufReadPre,BufNewFile *.py let python_highlight_all=1 |
@@ -143,16 +151,15 @@ if has("autocmd")
   " autocmd FileType Makefile
   au BufRead,BufNewFile Makefile* setlocal noexpandtab
 
-  au BufNewFile *
-    \ setlocal fileformat=unix autoindent smartindent
+  au BufNewFile * setlocal fileformat=unix autoindent smartindent
 
   " google style => h2,l1,g2,t0,i4,+4,(0,w1,W4
   au BufRead,BufNewFile *.c,*.cpp,*.h,*.cs
     \ setlocal ts=4 sw=4 sts=4 |
-    \ nmap <F6> :call Make(0)<cr> |
-    \ imap <F6> <esc>:call Make(0)<cr>a |
-    \ nmap <F7> :call Make(1)<cr> |
-    \ imap <F7> <esc>:call Make(1)<cr>a |
+    \ nnoremap <buffer> <F6> :<C-U>call Make(0)<cr> |
+    \ inoremap <buffer> <F6> <esc>:<C-U>call Make(0)<cr>a |
+    \ nnoremap <buffer> <F7> :<C-U>call Make(1)<cr> |
+    \ inoremap <buffer> <F7> <esc>:<C-U>call Make(1)<cr>a |
     \ setlocal cinoptions+=:0,l1,b0,g2,h2,(0,t0,i4,+4,w1,W4,N-s
   " ) this comment closes the bracket in cinoptions
 
@@ -178,69 +185,57 @@ endif " has("autocmd")
 
 " Convenient command to see the difference between the current buffer and the
 " file it was loaded from, thus the changes you made.
-command DiffOrig let &columns=172 | vert new | set bt=nofile | r # | 0d_ | diffthis
+command! DiffOrig set co=172 | vert new | set bt=nofile | r # | 0d_ | diffthis
             \ | wincmd p | diffthis
 
-map <M-Up> <Up>
-map <M-Down> <Down>
-map <M-Right> <Right>
-map <M-Left> <Left>
 
-imap <M-Up> <Up>
-imap <M-Down> <Down>
-imap <M-Right> <Right>
-imap <M-Left> <Left>
+" Moving cursor to other windows
+noremap <M-Up> <C-W><Up>
+noremap <M-Down> <C-W><Down>
+noremap <M-Right> <C-W><Right>
+noremap <M-Left> <C-W><Left>
 
-nmap <M-F1> :set modifiable! modifiable?<cr>
-nmap <C-F1> :set viminfo=<cr>
-nmap <S-F7> :set ic! ic?<cr>
-nmap <S-F8> :set wrap! wrap?<cr>
-nmap <S-F9> :set number! number?<cr>
-nmap <S-Up> <C-Y>
-nmap <S-Down> <C-E>
-nmap <S-Left> zh
-nmap <S-Right> zl
-imap <S-Up> <Up>
-imap <S-Down> <Down>
-vmap <S-Up> <Up>
-vmap <S-Down> <Down>
-nmap <C-F4> :cclose<cr>
+inoremap <M-Up> <C-O><C-W><Up>
+inoremap <M-Down> <C-O><C-W><Down>
+inoremap <M-Right> <C-O><C-W><Right>
+inoremap <M-Left> <C-O><C-W><Left>
 
-" Use CTRL-S for saving, also in Insert mode
+" Resetting/toggling options
+nnoremap <M-F1> :set modifiable! modifiable?<cr>
+nnoremap <C-F1> :set viminfo=<cr>
+nnoremap <S-F7> :set ic! ic?<cr>
+nnoremap <S-F8> :set wrap! wrap?<cr>
+nnoremap <S-F9> :set number! number?<cr>
+
+" Scrolling
+nnoremap <S-Up> <C-Y>
+nnoremap <S-Down> <C-E>
+nnoremap <S-Left> zh
+nnoremap <S-Right> zl
+inoremap <S-Up> <Up>
+inoremap <S-Down> <Down>
+vnoremap <S-Up> <Up>
+vnoremap <S-Down> <Down>
+
+" CTRL-S for saving, also in Insert mode
 noremap <C-S>   :update<cr>
 vnoremap <C-S>  <C-C>:update<cr>
 inoremap <C-S>  <C-O>:update<cr>
 
-" function FindHere(pat)
-"   let s:pat = a:pat " escape(a:pat, '\')
-"   let s:cmd = "vimgrep /".s:pat."/j **/*"
-"   echo s:cmd
-"   exe s:cmd
-"   cwindow
-" endfunction
-" command -nargs=1 VG call FindHere(<f-args>)
-" nmap  :let @s='"\\<'.expand("<cword>").'\\>"'<cr>:call FindHere(s)<cr>lh
-" vmap  "sy:let @s=string(@s)<cr>:call FindHere(s)<cr>lh
-" nmap <S-F3> :GtagsCursor<cr>
+" Common keyword search tasks
+nnoremap <C-F3> :let @s=expand("<cword>")<cr>:vimgrep /\<<C-R>s\>/j **/*.cpp **/*.c **/*.h<cr>lh
+vnoremap <C-F3> "sy:vimgrep /<C-R>s/j **/*.cpp **/*.c **/*.h<cr>lh
 
-" common keyword search tasks
-nmap <C-F3> :let @s=expand("<cword>")<cr>:vimgrep /\<s\>/j **/*.cpp **/*.c **/*.h<cr>lh
-vmap <C-F3> "sy:vimgrep /s/j **/*.cpp **/*.c **/*.h<cr>lh
-nmap <C-F2> :let @s=expand("<cword>")<cr>:vimgrep /\<s\>/j **/*.cpp **/*.c<cr>lh
-vmap <C-F2> "sy:vimgrep /s/j **/*.cpp **/*.c<cr>lh
-nmap <S-F2> :let @s=expand("<cword>")<cr>:vimgrep /\<s\>/j **/*.h<cr>lh
-vmap <S-F2> "sy:vimgrep /s/j **/*.h<cr>lh
+" For mark.vim plugin
+nmap <F1> <leader>n:nohlsearch<cr>
+nmap <F2> <leader>m
+vmap <F2> <leader>m
+nmap <F3> <Leader>*
+nmap <S-F3> <Leader>#
 
-" for mark.vim plugin
-nmap <F3> \*
-nmap <S-F3> \#
-nmap <F2> \m
-vmap <F2> \m
-" nmap <S-F1> \n
-nmap <F1> \n:nohlsearch<cr>
-
+" If colors indistinguishable...
 let s:toggle_search = 0
-function ToggleSearchHl()
+function! ToggleSearchHl()
   if s:toggle_search == 0
     let s:toggle_search = 1
     hi! Search gui=NONE guifg=gray10 guibg=gold
@@ -251,7 +246,7 @@ function ToggleSearchHl()
   " echo s:toggle_search
 endfunction
 
-nmap <F5> :call ToggleSearchHl()<cr>
+" nnoremap <F5> :call ToggleSearchHl()<cr>
 
 let s:cnum = 0
 function! ShowNextError(dir)
@@ -281,16 +276,20 @@ function! ShowNextError(dir)
   endtry
 endfunction
 
-nmap <F4> :call ShowNextError(1)<cr>
-nmap <S-F4> :call ShowNextError(-1)<cr>
+nnoremap <F4> :call ShowNextError(1)<cr>
+"nnoremap <F4> :CpfNext<cr>
+nnoremap <S-F4> :call ShowNextError(-1)<cr>
+nnoremap <C-F4> :cclose<cr>
 
-" function Gnuindent()
-"   "exe "%!indent -st -sob -bbb -bap -npsl -npcs -ncs -cdw -nfca -nfc1 -ss -ut -i4 -ts4 -bli0 -l160 -lc160 -c45 -cd45"
-"   "exe "%!indent -st -sob -bap -npsl -npcs -ncs -cdw -nfca -ss -nut -i4 -ts4 -bli0 -l120 -lc120 -c45 -cd45"
+" function! Gnuindent()
+"   " -st -sob -bbb -bap -npsl -npcs -ncs -cdw -nfca -nfc1 -ss -ut -i4 -ts4 -bli0 -l160 -lc160 -c45 -cd45"
+"   " -st -sob -bap -npsl -npcs -ncs -cdw -nfca -ss -nut -i4 -ts4 -bli0 -l120 -lc120 -c45 -cd45"
 "   exe "%!indent -st -sob -bap -npsl -npcs -ncs -cdw -nfca -ss -nut -i4 -ts4 -bli0 -l120 -lc120"
 " endfunction
 
-function IndentPrep(canjump)
+" Indentation resetting/cleaning - for third-party files
+
+function! IndentPrep(canjump)
   if (!a:canjump)
     normal! mj
   endif
@@ -309,7 +308,7 @@ function IndentPrep(canjump)
   echo 'prepared for indentation'
 endfunction
 
-function IndentPatch(canjump)
+function! IndentPatch(canjump)
   if (!a:canjump)
     normal! mj
   endif
@@ -321,14 +320,8 @@ function IndentPatch(canjump)
   endif
 endfunction
 
-function! ReSpace()
-  normal! mi
-  silent! %retab
-  silent! :%s/[ \r\t]\+$//e
-  normal! `i
-endfunction
-
-function AStyle1tbs()
+" One True Brace Style formatting/indenting - preferred
+function! AStyle1tbs()
   normal! mi
   call IndentPrep(1)
   " exe "%!astyle -A10 -w -Y -j -c -f -p -H -U -k1 -xG -xn -xc -xk -xV -xy -o --mode=c"
@@ -337,14 +330,16 @@ function AStyle1tbs()
   normal! `i
 endfunction
 
-function AStyleA4()
+" Stroustrup style formatting/indenting.
+function! AStyleA4()
   normal! mi
   exe "%!astyle -A4 -w -Y -j -c -f -p -H -U -k1 -xG --mode=c"
   silent! %s/\_s*\%$/\r/
   normal! `i
 endfunction
 
-function AStyleA14()
+" Google style formatting/indenting.
+function! AStyleA14()
   normal! mi
   exe "%!astyle -A14 -w -Y -j -c -f -p -H -U -k3 -xG --mode=c"
   silent! %s/\_s*\%$/\r/
@@ -353,7 +348,14 @@ endfunction
 
 " TODO - check LLVM for clang-format
 
-function Pylint()
+function! ReSpace()
+  normal! mi
+  silent! %retab
+  silent! :%s/[ \r\t]\+$//e
+  normal! `i
+endfunction
+
+function! Pylint()
   if expand("%:e") == 'py'
     cexpr system('cmd /c "pylint.bat --output-format=parseable ' . expand('%') . '"')
   else
@@ -361,7 +363,7 @@ function Pylint()
   endif
 endfunction
 
-function PyPep8()
+function! PyPep8()
   if expand("%:e") == 'py'
     cexpr system('cmd /c "pep8.bat ' . expand('%') . '"')
   else
@@ -369,7 +371,7 @@ function PyPep8()
   endif
 endfunction
 
-function PyChecker()
+function! PyChecker()
   if expand("%:e") == 'py'
     cexpr system('cmd /c "pychecker.bat ' . expand('%') . '"')
   else
@@ -381,9 +383,9 @@ endfunction
 " It depends on cc.bat and ccc.bat; ccc.bat is a sym-link to cc.bat
 "
 " Make(0) is mapped to <F6> calls ccc.bat to check syntax only
-" Make(0) is mapped to <F7> calls cc.bat and can produce executable
-" The first argument of cc.bat is a compiler id that is the range
-" of the Mark()
+" Make(1) is mapped to <F7> calls cc.bat and can produce executable
+" The first argument of cc.bat is whether to compile or to analyze.
+" The range gives the v:count that is used as the compiler id.
 " E.g. keystrokes 5<F7> calls LLVM/Clang for compilation
 "
 " WARNING: since range is used in an odd way and it depends on an
@@ -397,12 +399,14 @@ function! Make(compile) range
     if a:compile > 0
       let l:cc = 'cc.bat'
     endif
+
     if executable(l:cc)
       let l:oldmp=&makeprg
       set makeprg=cc
       if a:compile > 0
         set makeprg=c
       endif
+
       let s:ccid = v:count > 0 ? v:count : s:ccid == 0 ? 14 : s:ccid
       let l:cmd = 'make! ' . s:ccid
 
@@ -411,6 +415,7 @@ function! Make(compile) range
       elseif exists("g:cxxflags")
         let l:cmd .= ' ' . g:cxxflags
       endif
+
       if (match(expand('%:r'), '\s') > 0)
         let l:cmd .=  ' "' . expand('%') . '"'
       else
@@ -430,6 +435,7 @@ function! Make(compile) range
           let l:m.note += match(l.text, ' note[ :]\c') >= 0 ? 1 : 0
         " endif
       endfor
+
       let l:msg = 'make! compiler(' . l:cc . ' ' . s:ccid . ') '
       if l:m.error > 0
         echohl ErrorMsg
@@ -444,6 +450,7 @@ function! Make(compile) range
         echohl MoreMsg
         echon "\r" l:msg ': done'
       endif
+
       echohl None
       if l:m.error + l:m.warning + l:m.note > 0
         copen
@@ -451,6 +458,7 @@ function! Make(compile) range
       else
         cwindow
       endif
+
       let &makeprg=l:oldmp
     else
       echohl WarningMsg
@@ -461,56 +469,18 @@ function! Make(compile) range
     echohl ErrorMsg
     echo 'Error: ''cc'' can compile or check .c/.cpp files only'
     echohl None
-    if bufname("%") == "" 
+
+    if bufname("%") == ""
       wincmd p
     endif
   endif
 endfunction
 
-" older version of Mark()
-" function! Make() range
-"   if (match(expand('%'), "\\c\\.cpp$") > 0) || (match(expand('%'), "\\c\\.c$") > 0)
-"     if executable("cc.bat")
-"       let l:oldmp=&makeprg
-"       set makeprg=cc
-"       let l:ccid = v:count
-"       if l:ccid > 0
-"         let s:ccid = l:ccid
-"       elseif s:ccid == 0
-"         let s:ccid = 14
-"       endif
-" 
-"       if  s:ccid > 0
-"         let s:cmd = "make! " . s:ccid . " " . expand("%")
-"       else
-"         let s:cmd = "make! d ".expand("%")
-"       endif
-"       echon "\r" s:cmd
-"       silent! update
-"       lcd %:h
-"       silent! exe s:cmd
-"       echohl MoreMsg
-"       echon "\r" s:cmd " - done"
-"       echohl None
-"       cwindow
-"       let &makeprg=l:oldmp
-"     else
-"       echohl WarningMsg
-"       echo "Error: compiler stub \"cc.bat\" not found"
-"       echohl None
-"     endif
-"   else
-"     echohl ErrorMsg
-"     echo "Error: cc can only compile .c/.cpp files"
-"     echohl None
-"   endif
-" endfunction
-
-" changes color scheme; _desert is too dark for editing c-macros
+" changes color scheme; rested is too dark for editing c-macros
 function! ColorSwitch()
   if &background == 'light'
     set background=dark
-    colorscheme _desert
+    colorscheme rested
   else
     set background=light
     colorscheme default
@@ -519,26 +489,42 @@ function! ColorSwitch()
   call InitMarkColor()
 endfunction
 
-nmap <C-F5> :call ColorSwitch()<cr>
+nnoremap <C-F5> :call ColorSwitch()<cr>
 
-nmap <F12> :TlistToggle<cr>
+function! Help(...)
+  if a:0 > 0 && a:1 != ''
+    let l:arg = a:1
+  else
+    let l:arg = 'quickref'
+  endif
+
+  if &columns < 100
+    set columns=170
+  endif
+
+  execute 'vertical help '. l:arg
+endfunction
+
+command! -nargs=?
+  \ -complete=help
+  \ H call Help(<q-args>)
+
+
+nnoremap <F12> :TlistToggle<cr>
 
 " relax ~/vimfiles/after/syntax/c.vim
-" .../after/syntax/c.vim highlight some space/indentation errors
-function ResetAfterC()
+" since .../after/syntax/c.vim highlights some space/indentation errors
+function! ResetAfterC()
   hi! link cTab               Normal
   hi! link cBSlashError       Normal
   hi! link cSpaceError        Normal
 endfunction
 
-nmap <S-F5> :call ResetAfterC()<cr>
+nnoremap <S-F5> :call ResetAfterC()<cr>
 
 " WARNING: below two are unusual and can be surprising
-imap <S-CR> o
-smap <cr> <esc>o
-
-" set updatetime=2000
-" set cursorline
+inoremap <S-CR> <C-O>o
+snoremap <cr> <esc>o
 
 set makeprg=rem
 set wildignore=*.o,*.obj,*.a,*.lib,*.pdb,*.dll,*.bak,*.pch
@@ -552,42 +538,35 @@ let g:cxxflags=''
 " for taglist plugin
 let Tlist_Show_One_File = 1
 
-" for vim-notes plugin
-" let g:notes_suffix = '.txt'
-
-" for calendar plugin
-" let g:calendar_mark = 'right'
-" let g:calendar_monday = 1
-" let g:calendar_weeknm = 5
-
 " for mark.vim plugin --- need to revise the colors
 let g:mwHistAdd = ""
-function InitMarkColor()
+function! InitMarkColor()
   hi MarkWord1  guibg=#90f9b0 guifg=black
   hi MarkWord2  guibg=#a090f9 guifg=black
   hi MarkWord3  guibg=#f990f0 guifg=black
   hi MarkWord4  guibg=#90e1f9 guifg=black
   hi MarkWord5  guibg=#f99090 guifg=black
   hi MarkWord6  guibg=#f9f090 guifg=black
-  hi MarkWord7  guibg=#a0f990 guifg=gold4
-  hi MarkWord8  guibg=#90f9e1 guifg=gold4
-  hi MarkWord9  guibg=#90aff9 guifg=gold4
-  hi MarkWord10 guibg=#d190f9 guifg=gold4
-  hi MarkWord11 guibg=#f990c1 guifg=gold4
-  hi MarkWord12 guibg=#f9da90 guifg=gold4
-  hi MarkWord13 guibg=#b8f990 guifg=gold4
-  hi MarkWord14 guibg=#90f9c8 guifg=cyan4
-  hi MarkWord15 guibg=#90c8f9 guifg=cyan4
-  hi MarkWord16 guibg=#b890f9 guifg=cyan4
-  hi MarkWord17 guibg=#f990d9 guifg=cyan4
-  hi MarkWord18 guibg=#f9a890 guifg=cyan4
-  hi MarkWord19 guibg=#e9f990 guifg=cyan4
-  hi MarkWord20 guibg=#90f999 guifg=purple3
-  hi MarkWord21 guibg=#90f9f9 guifg=purple3
-  hi MarkWord22 guibg=#9099f9 guifg=purple3
-  hi MarkWord23 guibg=#e990f9 guifg=purple3
-  hi MarkWord24 guibg=#f990a8 guifg=purple3
-  hi MarkWord25 guibg=#f9c190 guifg=purple3
-  hi MarkWord26 guibg=#d1f990 guifg=purple3
+  hi MarkWord7  guibg=#a0f990 guifg=gold3 gui=undercurl guisp=black
+  hi MarkWord8  guibg=#90f9e1 guifg=gold3 gui=undercurl guisp=black
+  hi MarkWord9  guibg=#90aff9 guifg=gold4 gui=undercurl guisp=black
+  hi MarkWord10 guibg=#d190f9 guifg=gold4 gui=undercurl guisp=black
+  hi MarkWord11 guibg=#f990c1 guifg=gold4 gui=undercurl guisp=black
+  hi MarkWord12 guibg=#f9da90 guifg=gold4 gui=undercurl guisp=black
+  hi MarkWord13 guibg=#b8f990 guifg=gold3 gui=undercurl guisp=black
+  hi MarkWord14 guibg=#90f9c8 guifg=cyan3 gui=italic
+  hi MarkWord15 guibg=#90c8f9 guifg=cyan4 gui=italic
+  hi MarkWord16 guibg=#b890f9 guifg=cyan4 gui=italic
+  hi MarkWord17 guibg=#f990d9 guifg=cyan4 gui=italic
+  hi MarkWord18 guibg=#f9a890 guifg=cyan4 gui=italic
+  hi MarkWord19 guibg=#e9f990 guifg=cyan4 gui=italic
+  hi MarkWord20 guibg=#90f999 guifg=blue3 gui=underline
+  hi MarkWord21 guibg=#90f9f9 guifg=blue3 gui=underline
+  hi MarkWord22 guibg=#9099f9 guifg=blue3 gui=underline
+  hi MarkWord23 guibg=#e990f9 guifg=blue3 gui=underline
+  hi MarkWord24 guibg=#f990a8 guifg=blue3 gui=underline
+  hi MarkWord25 guibg=#f9c190 guifg=blue3 gui=underline
+  hi MarkWord26 guibg=#d1f990 guifg=blue3 gui=underline
 endfunction
 
+call InitMarkColor()
