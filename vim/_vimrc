@@ -1,7 +1,7 @@
 "
 " vimrc --- for GVim 8, perhaps a gvimrc in disguise.
 "
-" Last change:  2018-03-21
+" Last change:  2018-02-26
 "
 " >>  Based on the example for a vimrc file
 " >>  by Bram Moolenaar <Bram@vim.org>
@@ -174,6 +174,9 @@ if has("autocmd")
     \ if line("'\"") > 0 && line("'\"") <= line("$") |
     \   exe "normal! g`\"" |
     \ endif
+
+  autocmd InsertEnter * highlight Cursor guibg=#ffcccc
+  autocmd InsertLeave * highlight Cursor guibg=slategrey
 
   augroup END
 
@@ -384,13 +387,17 @@ endfunction
 "
 " Make(0) is mapped to <F6> calls ccc.bat to check syntax only
 " Make(1) is mapped to <F7> calls cc.bat and can produce executable
-" The first argument of cc.bat is whether to compile or to analyze.
+" The first argument of Make() is whether to compile or to analyze.
 " The range gives the v:count that is used as the compiler id.
 " E.g. keystrokes 5<F7> calls LLVM/Clang for compilation
+"
+" When environment variable CC_OPT_COLOR is set 'no' ansi escape
+" sequences are not used. Otherwise cc's messages are colorized.
 "
 " WARNING: since range is used in an odd way and it depends on an
 "          external cc.bat extra care should be taken to use this.
 "
+let $CC_OPT_COLOR='no'
 let s:ccid = 0
 function! Make(compile) range
   if (match(expand('%'), '\.\(c\|cpp\|cc\)$\c') > 0)
@@ -570,3 +577,5 @@ function! InitMarkColor()
 endfunction
 
 call InitMarkColor()
+
+
